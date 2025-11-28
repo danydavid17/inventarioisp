@@ -16,11 +16,10 @@ echo -e "${GREEN}=== INSTALADOR AUTOMÁTICO SISTEMA ISP (V2) ===${NC}"
 
 # 1. ACTUALIZAR SISTEMA E INSTALAR DEPENDENCIAS
 echo -e "${GREEN}[1/6] Actualizando servidor e instalando requisitos...${NC}"
-# Forzamos modo no interactivo para que no pregunte cosas durante la instalación
 export DEBIAN_FRONTEND=noninteractive
-apt update -y
-apt install -y apache2 mariadb-server git unzip curl
-apt install -y php libapache2-mod-php php-mysql php-zip php-mbstring php-curl php-xml php-gd
+apt-get update -y
+apt-get install -y apache2 mariadb-server git unzip curl
+apt-get install -y php libapache2-mod-php php-mysql php-zip php-mbstring php-curl php-xml php-gd
 
 # 2. CONFIGURAR BASE DE DATOS
 echo -e "${GREEN}[2/6] Configurando Base de Datos...${NC}"
@@ -32,21 +31,21 @@ mysql -e "FLUSH PRIVILEGES;"
 # 3. LIMPIEZA WEB
 echo -e "${GREEN}[3/6] Preparando directorio web...${NC}"
 cd /var/www/html
-# Solo borramos el index.html por defecto de Apache, intentamos respetar otros archivos si existen
 rm -f index.html
 
 # 4. DESCARGAR SISTEMA
 echo -e "${GREEN}[4/6] Obteniendo archivos del sistema...${NC}"
-# Preguntamos si usar un repo o buscar archivos locales
-read -p "Introduce URL del Repo GitHub (o presiona ENTER si subiste los archivos manualmente): " REPO_URL
+read -p "Introduce URL del Repo GitHub: " REPO_URL
 
 if [ ! -z "$REPO_URL" ]; then
+    # Clonamos en carpeta temporal para evitar conflictos
     git clone $REPO_URL temp_repo
-    mv temp_repo/* .
+    # Movemos el contenido (incluso archivos ocultos si los hubiera)
+    cp -r temp_repo/* .
     rm -rf temp_repo .git
-    echo "Archivos descargados desde GitHub."
+    echo "Archivos descargados."
 else
-    echo -e "${YELLOW}Omitiendo descarga. Se asume que subiste los archivos (api.php, index.html, SQL.sql) manualmente.${NC}"
+    echo -e "${YELLOW}Saltando descarga (se asume carga manual).${NC}"
 fi
 
 # 5. IMPORTAR SQL Y CONFIGURAR API
@@ -66,19 +65,13 @@ else
     echo -e "${RED}ERROR: No se encontró api.php${NC}"
 fi
 
-# 6. INSTALAR PHPMAILER (VERIFICACIÓN INTELIGENTE)
-echo -e "${GREEN}[6/6] Verificando librería de correos (PHPMailer)...${NC}"
+# 6. INSTALAR PHPMAILER
+echo -e "${GREEN}[6/6] Verificando librería de correos...${NC}"
 if [ -d "PHPMailer" ]; then
-    echo -e "${YELLOW}La carpeta PHPMailer ya existe. Saltando descarga.${NC}"
+    echo -e "${YELLOW}PHPMailer ya existe.${NC}"
 else
-    echo "La carpeta no existe. Descargando PHPMailer..."
+    echo "Descargando PHPMailer..."
     git clone https://github.com/PHPMailer/PHPMailer.git
-    
-    if [ -d "PHPMailer" ]; then
-        echo "PHPMailer instalado correctamente."
-    else
-        echo -e "${RED}Error al descargar PHPMailer. Revisa tu conexión.${NC}"
-    fi
 fi
 
 # 7. AJUSTAR PERMISOS FINALES
