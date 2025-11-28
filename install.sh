@@ -3,7 +3,8 @@
 # --- CONFIGURACION ---
 DB_NAME="inventario_isp"
 DB_USER="app_isp"
-DB_PASS=$(openssl rand -base64 12) # Genera clave aleatoria
+# Generamos una clave segura aleatoria para la BD
+DB_PASS=$(openssl rand -base64 12)
 
 # --- COLORES ---
 GREEN='\033[0;32m'
@@ -13,22 +14,24 @@ NC='\033[0m'
 
 echo -e "${GREEN}=== INSTALADOR TODO-EN-UNO SISTEMA ISP ===${NC}"
 
-# 1. INSTALAR REQUISITOS
-echo -e "${GREEN}[1/5] Instalando servidor y PHP...${NC}"
+# 1. INSTALAR REQUISITOS DEL SERVIDOR
+echo -e "${GREEN}[1/5] Instalando Apache, PHP y MariaDB...${NC}"
 export DEBIAN_FRONTEND=noninteractive
 apt-get update -y
 apt-get install -y apache2 mariadb-server git unzip curl
 apt-get install -y php libapache2-mod-php php-mysql php-zip php-mbstring php-curl php-xml php-gd
 
-# 2. CONFIGURAR USUARIO DE BASE DE DATOS
-echo -e "${GREEN}[2/5] Configurando accesos BD...${NC}"
+# 2. CREAR BASE DE DATOS Y USUARIO
+echo -e "${GREEN}[2/5] Configurando accesos a la Base de Datos...${NC}"
 mysql -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME};"
 mysql -e "CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';"
 mysql -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';"
 mysql -e "FLUSH PRIVILEGES;"
 
-# 3. CREAR TABLAS E INSERTAR DATOS (Aquí reemplazamos al archivo SQL.sql)
-echo -e "${GREEN}[3/5] Construyendo estructura de la Base de Datos...${NC}"
+# 3. CONSTRUIR ESTRUCTURA SQL (Aquí está la magia, sin archivo externo)
+echo -e "${GREEN}[3/5] Creando tablas e insertando datos base...${NC}"
+
+# Usamos 'EOF' para incrustar el SQL directamente en el script
 mysql ${DB_NAME} <<EOF
 -- TABLA CONFIGURACION
 CREATE TABLE IF NOT EXISTS \`configuracion\` (
@@ -53,6 +56,7 @@ CREATE TABLE IF NOT EXISTS \`usuarios\` (
   UNIQUE KEY \`user\` (\`user\`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Insertamos usuario admin (clave: 1234)
 INSERT IGNORE INTO \`usuarios\` (\`user\`, \`pass\`, \`admin\`, \`rol\`) VALUES
 ('admin', '\$2y\$10\$uh2bSCNFooCiYy12FDXSkeKMzN8ibZwENdW0F/WFL.zaFE1ELPzjO', 1, 'admin');
 
@@ -118,40 +122,44 @@ CREATE TABLE IF NOT EXISTS \`devoluciones\` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 EOF
 
-# 4. DESCARGAR PHP (API) Y HTML
-echo -e "${GREEN}[4/5] Descargando aplicación...${NC}"
+# 4. DESCARGAR API Y HTML DESDE GITHUB
+echo -e "${GREEN}[4/5] Descargando aplicación web...${NC}"
 cd /var/www/html
 rm -f index.html
 
-read -p "Introduce URL del Repo GitHub: " REPO_URL
+# Preguntamos URL, si está vacío asume carga manual
+read -p "Introduce URL del Repo GitHub (o dale Enter si ya subiste api.php e index.html manualmente): " REPO_URL
+
 if [ ! -z "$REPO_URL" ]; then
     git clone $REPO_URL temp_repo
     cp -r temp_repo/* .
     rm -rf temp_repo .git
-    echo "Archivos descargados."
+    echo "Archivos descargados desde GitHub."
 else
-    echo -e "${YELLOW}Saltando descarga (se asume carga manual).${NC}"
+    echo -e "${YELLOW}Omitiendo descarga. Usando archivos locales existentes.${NC}"
 fi
 
-# Conectar API con la BD (Reemplazo de contraseña)
+# 5. CONECTAR API CON BASE DE DATOS
 if [ -f "api.php" ]; then
+    # Buscamos la clave genérica y la cambiamos por la generada
     sed -i "s/UnaClave_MuyDificil_99\\$/${DB_PASS}/g" api.php
-    echo "API conectada a la base de datos."
+    echo "Clave de API actualizada correctamente."
 else
-    echo -e "${RED}¡ALERTA! No se encontró api.php. Sube los archivos manualmente.${NC}"
+    echo -e "${RED}¡ALERTA! No se encontró api.php. Asegúrate de subirlo.${NC}"
 fi
 
-# 5. EXTRAS
-echo -e "${GREEN}[5/5] Finalizando...${NC}"
-# PHPMailer
+# 6. INSTALAR PHPMAILER (CORREOS)
+echo -e "${GREEN}[5/5] Finalizando instalación...${NC}"
 if [ ! -d "PHPMailer" ]; then
     git clone https://github.com/PHPMailer/PHPMailer.git
 fi
 
-# Permisos
+# AJUSTAR PERMISOS
 chown -R www-data:www-data /var/www/html
 chmod -R 755 /var/www/html
 
-echo -e "${GREEN}=== ¡INSTALACIÓN EXITOSA! ===${NC}"
-echo -e "BD: ${DB_USER} / ${DB_PASS}"
-echo -e "Accede en: http://$(hostname -I | cut -d' ' -f1)"
+echo -e "${GREEN}=== ¡INSTALACIÓN COMPLETADA! ===${NC}"
+echo -e "BD Usuario: ${DB_USER}"
+echo -e "BD Clave:   ${DB_PASS}"
+echo -e "------------------------------------"
+echo -e "Accede al sistema: http://$(hostname -I | cut -d' ' -f1)"
