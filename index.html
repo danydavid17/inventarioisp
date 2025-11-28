@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>GSE DOMINICANA</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+<style>
+  :root{ --bg:#f4f6f8; --card:#ffffff; --primary:#000000; --primary-dark:#111111; --muted:#6b7280; --danger: #dc2626; --separator: #e5e7eb; }
+  *{box-sizing:border-box}
+  body{font-family:Arial, sans-serif;margin:0;background:var(--bg);color:#111;}
+  header{ background:linear-gradient(90deg,var(--primary),var(--primary-dark)); color:#fff; padding:12px 24px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+  header h1{margin:0;font-size:18px;}
+  #headerTitle { margin-left: 70px; font-size: 22px; font-weight: bold; letter-spacing: 1px; }
+  .btn-logout-header { background: rgba(255, 255, 255, 0.15); color: #fff; border: 1px solid rgba(255, 255, 255, 0.3); padding: 8px 16px; font-size: 13px; border-radius: 6px; cursor: pointer; width: auto; margin: 0; transition: all 0.2s ease; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+  .btn-logout-header:hover { background: rgba(255, 255, 255, 0.3); transform: translateY(-1px); }
+  .container{max-width:1100px;margin:24px auto;padding:0 16px;}
+  .card{background:var(--card);padding:20px;margin:12px auto;border-radius:10px;box-shadow:0 6px 18px rgba(15,23,42,0.06);}
+  .row{display:flex;gap:12px;flex-wrap:wrap;}
+  .col{flex:1 1 200px;}
+  input, select, button:not(.btn-logout-header):not(.config-nav button):not(.deleteBtn):not(.deleteBtnTable):not(#sidebar button):not(.pagination-btn) { padding:10px; margin:6px 0; width:100%; font-size:14px; border: 1px solid #ccc; border-radius: 8px; transition: all 0.2s ease-in-out; }
+  input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1); }
+  button.primary{background:var(--primary);color:#fff;border:none;cursor:pointer;}
+  button.primary:hover{background:var(--primary-dark); transform: translateY(-1px);}
+  button.muted{background:#eef2f6;color:#333;border:none;cursor:pointer;}
+  button.muted:hover{background:#e5e7eb; transform: translateY(-1px);}
+  button.danger{background:var(--danger);color:#fff;border:none;cursor:pointer;}
+  button.danger:hover{opacity:0.9; transform: translateY(-1px);}
+  .deleteBtnTable { background:none; border:none; font-size:16px; color:var(--danger); cursor:pointer; padding: 0 4px; width: auto; }
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th,td{border:1px solid #e5e7eb;padding:8px;text-align:left;}
+  th{background:#f9fafb;color:var(--muted);}
+  #sidebar{ position:fixed; left:0; top:0; width:60px; height:100%; background:#111827; display:none; flex-direction:column; align-items:center; padding-top:16px; padding-bottom:16px; z-index: 100; }
+  #sidebar button{ width:40px; height:40px; margin:8px 0; font-size:20px; background:none; border:none; color:#9ca3af; cursor:pointer; display: flex; justify-content: center; align-items: center; font-weight: bold; border-radius: 6px; transition: all 0.2s ease-in-out; }
+  #sidebar button:hover{ background-color: #374151; color: #fff; }
+  #sidebar button.active-sidebar { background-color: #374151; color: #fff; border-left: 3px solid #60a5fa; border-radius: 0 6px 6px 0; }
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}
+  .statBox{ text-align:center; padding:16px; background:#fff; border-radius:10px; box-shadow:0 4px 12px rgba(15,23,42,0.06); transition: transform 0.2s; border: 1px solid transparent; }
+  .statBox:hover { transform: translateY(-2px); border-color: #e5e7eb; }
+  .statNum{font-size:28px;font-weight:bold;margin-top:6px;}
+  .userRow{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;background:#f3f4f6;border-radius:8px;margin:4px 0;font-size:14px;}
+  .deleteBtn{background:none;border:none;font-size:16px;color:var(--danger);cursor:pointer; padding: 0 4px; width: auto;} 
+  .cat-row { border: 1px solid #e5e7eb; padding: 8px; margin: 5px 0; border-radius: 6px; background: #f9fafb; }
+  .cat-bar-container { height: 10px; background: #eef2f6; border-radius: 5px; margin-top: 4px; overflow: hidden; }
+  .cat-bar { height: 100%; transition: width 0.5s ease-in-out; }
+  .color-green { background: #10b981; } .color-yellow { background: #facc15; } .color-red { background: #ef4444; }
+  .alerts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 20px; margin-bottom: 20px; }
+  .office-alert-card { background: #fff8f8; border: 1px solid #fecaca; border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #ef4444; }
+  .office-alert-card.warning { background: #fffbeb; border-color: #fde68a; border-left-color: #f59e0b; }
+  .office-title { font-weight: bold; font-size: 16px; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid rgba(0,0,0,0.05); text-transform: uppercase; color: #333; }
+  .alert-list { list-style: none; padding: 0; margin: 0; }
+  .alert-list li { font-size: 14px; margin-bottom: 4px; display: flex; justify-content: space-between; }
+  .tag-agotado { color: #b91c1c; font-weight: bold; font-size: 12px; background: #fecaca; padding: 2px 6px; border-radius: 4px; }
+  .tag-bajo { color: #b45309; font-weight: bold; font-size: 12px; background: #fef3c7; padding: 2px 6px; border-radius: 4px; }
+  
+  /* ESTILOS DE MODALES CORREGIDOS */
+  #customModal, #modalMoverOficina, #modalReingreso { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 10001; opacity: 0; visibility: hidden; transition: opacity 0.3s ease-in-out; }
+  #customModal.show, #modalMoverOficina.show, #modalReingreso.show { opacity: 1; visibility: visible; }
+  .modal-content { background: var(--card); padding: 25px; border-radius: 12px; max-width: 400px; width: 90%; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); transform: translateY(-20px); transition: transform 0.3s ease-in-out; }
+  #customModal.show .modal-content, #modalMoverOficina.show .modal-content, #modalReingreso.show .modal-content { transform: translateY(0); }
+  
+  .modal-content h3 { margin-top: 0; font-size: 1.5em; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+  #modalActions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  #modalActions button { width: auto; padding: 10px 18px; margin: 0; }
+  .config-section { padding-bottom: 20px; margin-bottom: 20px; border-bottom: 1px solid var(--separator); }
+  .config-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .config-nav { display: flex; gap: 15px; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 15px; justify-content: center; }
+  .config-nav button { background: none; border: none; font-size: 26px; cursor: pointer; color: var(--muted); transition: all 0.3s ease; width: auto; margin: 0 10px; padding: 10px; border-radius: 12px; }
+  .config-nav button:hover { background: #f3f4f6; transform: translateY(-2px); }
+  .config-nav button.active { color: var(--primary); background: #f0f0f0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+  .config-tab-content { display: none; animation: fadeIn 0.4s; }
+  .config-tab-content.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+  #graficoTecnicos, #graficoReportePersonal { max-height: 350px; width: 100%; }
+  .pagination { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px; }
+  .pagination-btn { padding: 8px 15px; border: 1px solid #ddd; background: #fff; cursor: pointer; border-radius: 5px; }
+  .pagination-btn:hover { background: #eee; }
+  .pagination-info { font-weight: bold; color: #555; }
+  @media print {
+    /* Ocultamos todo usando visibility para mantener la estructura pero que no se vea */
+    body { visibility: hidden; height: auto; }
+    
+    /* Hacemos visible SOLO el área de impresión */
+    #barcodePrintArea { 
+        visibility: visible !important;
+        display: block !important;
+        position: absolute; 
+        left: 0; 
+        top: 0; 
+        margin: 0; 
+        padding: 0;
+        width: 100%;
+        background: white; 
+        z-index: 999999;
+    }
+    
+    /* Aseguramos que los hijos del área de impresión también sean visibles */
+    #barcodePrintArea * { visibility: visible; }
+    
+    .mass-print-container { display: flex !important; flex-wrap: wrap !important; }
+  }
+  @media (max-width: 768px) {
+    #sidebar { width: 100%; height: 60px; top: auto; bottom: 0; left: 0; flex-direction: row; justify-content: space-around; padding: 0 10px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); border-top: 1px solid #374151; }
+    #sidebar button { width: auto; flex-grow: 1; height: 100%; margin: 0; border-radius: 0; font-size: 22px; }
+    #sidebar button.active-sidebar { border-left: none; border-top: 4px solid #60a5fa; background-color: #1f2937; }
+    body { padding-bottom: 80px; }
+    .container { margin: 10px auto; padding: 0 10px; width: 100%; }
+    header { flex-direction: column; gap: 10px; text-align: center; padding: 15px; }
+    #headerTitle { margin-left: 0 !important; font-size: 18px !important; }
+    table { display: block; width: 100%; overflow-x: auto; white-space: nowrap; }
+    .row { gap: 0; }
+    .col { flex: 1 1 100%; width: 100%; }
+    input, select, button { min-height: 44px; }
+    .deleteBtnTable, button.muted { padding: 8px 12px; font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="loginScreen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999;">
+    <h1 style="color: #fff; font-size: 32px; margin-bottom: 5px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">GSE DOMINICANA</h1>
+    <h2 style="color: #888; font-size: 16px; margin-top: 0; margin-bottom: 25px; font-weight: normal;">Inventario ISP</h2>
+    <div class="card" style="width: 90%; max-width: 350px; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        <h2 style="text-align: center; color: #333; margin-top: 0; font-size: 18px;">Iniciar Sesión</h2>
+        <input id="loginUser" placeholder="Usuario" style="border: 1px solid #ccc; padding: 12px; margin-bottom: 10px; width: 100%; box-sizing: border-box;"/>
+        <input id="loginPass" placeholder="Contraseña" type="password" style="border: 1px solid #ccc; padding: 12px; margin-bottom: 20px; width: 100%; box-sizing: border-box;"/>
+        <button class="primary" onclick="login()" style="width: 100%; padding: 12px; font-size: 16px;">Entrar</button>
+    </div>
+</div>
+
+<div id="sidebar" style="display:none;">
+  <button id="sb_dashboard" onclick="mostrar('dashboard')" title="Dashboard">&#128202;</button> 
+  <button id="sb_registrar" onclick="mostrar('registrar')" title="Registrar Material">+</button> 
+  <button id="sb_asignar" onclick="mostrar('asignar')" title="Asignar">&#10148;</button> 
+  <button id="sb_completar" onclick="mostrar('completarOrden')" title="Completar Orden">&#10004;</button>
+  <button id="sb_devueltos" onclick="mostrar('devueltos')" title="Devoluciones">&#10557;</button> 
+  <button id="btnInventario" onclick="mostrar('inventario')" title="Inventario General">&#128230;</button> 
+  <button id="sb_historial" onclick="mostrar('historial')" title="Historial">&#128214;</button> 
+  <button id="sb_reportes" onclick="mostrar('asignacionesPersonal')" title="Reporte Personal">&#128100;</button> 
+  <button id="btnConfig" onclick="mostrar('config')" title="Configuración">&#9881;</button> 
+</div>
+
+<div id="app" style="display:none;">
+  <header>
+    <h1 id="headerTitle">GSE DOMINICANA</h1>
+    <button class="btn-logout-header" onclick="logout()">Cerrar Sesión</button>
+  </header>
+  
+  <div class="container">
+    <div class="card" id="dashboard">
+      <h2>Dashboard General</h2>
+      <div class="grid">
+        <div class="statBox"><div id="stat_box_1_title">...</div><div id="stat_box_1_num" class="statNum">0</div></div>
+        <div class="statBox"><div id="stat_box_2_title">...</div><div id="stat_box_2_num" class="statNum">0</div></div>
+        <div class="statBox"><div id="stat_box_3_title">...</div><div id="stat_box_3_num" class="statNum">0</div></div>
+      </div>
+      <div style="margin-top:20px;">
+        <div id="alertasContainer" class="alerts-grid"></div>
+        <h3 style="margin-top:20px;">Inventario por Categoría (Global)</h3>
+        <div id="listasCategorias"></div>
+      </div>
+      <h3 style="margin-top:20px;">Asignados por Técnico (Últimos 7 días)</h3>
+      <div class="card" style="padding: 10px; margin-top: 10px;"><canvas id="graficoTecnicos" height="150"></canvas></div>
+    </div>
+
+    <div class="card" id="asignacionesPersonal" style="display:none;">
+        <h2>Reporte de Artículos Asignados</h2>
+        <div class="row">
+            <div class="col" style="flex:1 1 300px;"><select id="selectPersonalAsignaciones" onchange="mostrarReporteAsignaciones()"><option value="" disabled selected>Seleccione Técnico</option></select></div>
+            <div class="col" style="flex:1 1 200px;">
+                <select id="filtroFechaAsignaciones" onchange="mostrarReporteAsignaciones()">
+                    <option value="total">Todas las asignaciones</option><option value="today">Hoy</option><option value="7d" selected>Últimos 7 días</option><option value="30d">Últimos 30 días</option><option value="6m">Últimos 6 meses</option>
+                </select>
+            </div>
+        </div>
+        <h3 style="margin-top:20px;">Distribución</h3>
+        <div class="card" style="padding: 10px; margin-top: 10px; min-height: 250px;"><canvas id="graficoReportePersonal" height="150"></canvas></div>
+        <div id="listaAsignacionesPersonal" style="margin-top:20px;"></div>
+    </div>
+    
+    <div class="card" id="registrar" style="display:none;">
+        <h2>Registrar Material</h2>
+        <div class="row">
+            <div class="col"><input id="codigo" placeholder="Código (8 dígitos, opcional)"/></div>
+            <div class="col"><input id="nombre" placeholder="Nombre del artículo"/></div>
+        </div>
+        <div class="row">
+            <div class="col"><input id="serial" placeholder="Serial (opcional)"/></div>
+            <div class="col" style="flex: 1 1 100px;"><input id="cantidad" type="number" min="1" value="1" placeholder="Cantidad"/></div>
+        </div>
+        <div class="row">
+             <div class="col">
+                <select id="registroOficina">
+                    <option value="" selected>Sin Oficina (General)</option>
+                </select>
+             </div>
+        </div>
+        <div class="row">
+            <div class="col" style="flex: 2 1 200px;"> 
+                <select id="categoria" onchange="toggleOtro()">
+                    <option value="ONU">ONU</option><option value="Caja TV">Caja TV</option><option value="Router">Router</option><option value="Repetidor WiFi">Repetidor WiFi</option><option value="UPS">UPS</option><option value="Paq. Conectores FTTH">Paq. Conectores FTTH</option><option value="Paq. Conectores RG6">Paq. Conectores RG6</option><option value="Paq. de grapas">Paq. de grapas</option><option value="Rollo de fibra Drop">Rollo de fibra Drop</option><option value="Rollo de cable UTP">Rollo de cable UTP</option><option value="Rollo de cable RG6">Rollo de cable RG6</option><option value="Micronodo">Micronodo</option><option value="Caja Nap">Caja Nap</option><option value="Manga">Manga</option><option value="Splitter">Splitter</option><option value="Antena CPE">Antena CPE</option><option value="Switch">Switch</option><option value="Otro">Otro</option>
+                </select>
+            </div>
+            <div class="col" style="flex: 1 1 100px;"></div>
+        </div>
+        <input id="categoriaOtro" placeholder="Especifique categoría" style="display:none;"/>
+        <button class="primary" onclick="registrarArticulo()">Registrar</button>
+    </div>
+
+    <div class="card" id="asignar" style="display:none;">
+      <h2>Asignar Material (Masivo)</h2>
+      
+      <div class="row">
+        <div class="col" style="flex: 2;">
+            <select id="persona"><option value="" disabled selected>Seleccione Técnico</option></select>
+        </div>
+        <div class="col" style="flex: 1;">
+            <input type="number" id="cantidadAsignar" placeholder="Cantidad de Artículos" min="1" value="1" oninput="generarInputsCodigos()" />
+        </div>
+      </div>
+
+      <p style="font-size:12px; color:#666; margin-bottom:5px;">Ingrese los códigos a asignar:</p>
+      
+      <div id="containerCodigosMasivos" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-bottom: 15px;">
+          <input class="inputCodigoMasivo" placeholder="Código 1">
+      </div>
+
+      <button class="primary" onclick="asignarArticulo()">Asignar Todo</button>
+    </div>
+    <div class="card" id="completarOrden" style="display:none;">
+        <h2>Completar Orden (Instalación Realizada)</h2>
+        <p style="color:#666; font-size:12px; margin-bottom:15px;">Ingrese los datos finales del equipo ya instalado.</p>
+        
+        <input id="codigoCompletar" placeholder="Código del Artículo (Obligatorio)"/>
+        <input id="clienteCompletar" placeholder="Nombre del Cliente (Obligatorio)"/>
+        
+        <div class="row">
+            <div class="col">
+                <select id="usoCompletar" onchange="toggleOtroCompletar()">
+                    <option value="" disabled selected>Razón de Uso (Obligatorio)</option>
+                    <option value="Instalacion">Instalación</option>
+                    <option value="Averia">Avería</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+        </div>
+        
+        <input id="usoOtroCompletar" placeholder="Especifique la razón" style="display:none;"/>
+        
+        <button class="primary" onclick="guardarCompletarOrden()" style="margin-top:15px; background:#10b981;">✅ Confirmar Orden</button>
+    </div>
+    <div class="card" id="devueltos" style="display:none;">
+        <h2>Registrar Devolución</h2>
+        
+        <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 15px; background: #f3f4f6; padding: 10px; border-radius: 8px;">
+            <label style="font-weight: bold; margin-right: 10px;">¿Es Antena?</label>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <input type="radio" name="radioEsAntena" value="si" onchange="toggleEsAntena()"> Sí
+            </label>
+            <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <input type="radio" name="radioEsAntena" value="no" checked onchange="toggleEsAntena()"> No
+            </label>
+        </div>
+
+        <div id="bloqueDevolucionStandard">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input id="codigoDevolucion" placeholder="Código a devolver" style="flex-grow: 1; margin: 6px 0;"/>
+                <button class="muted" onclick="generarCodigoDevolucion()" style="width: auto; padding: 10px 15px; margin: 6px 0; height: 42px; flex-shrink: 0;">Generar</button>
+            </div>
+            
+            <div class="row">
+                <div class="col">
+                    <select id="categoriaDevolucion">
+                        <option value="" selected>Seleccione Categoría</option><option value="ONU">ONU</option><option value="Caja TV">Caja TV</option><option value="Router">Router</option><option value="Repetidor WiFi">Repetidor WiFi</option><option value="UPS">UPS</option><option value="Paq. Conectores FTTH">Paq. Conectores FTTH</option><option value="Paq. Conectores RG6">Paq. Conectores RG6</option><option value="Paq. de grapas">Paq. de grapas</option><option value="Rollo de fibra Drop">Rollo de fibra Drop</option><option value="Rollo de cable UTP">Rollo de cable UTP</option><option value="Rollo de cable RG6">Rollo de cable RG6</option><option value="Micronodo">Micronodo</option><option value="Caja Nap">Caja Nap</option><option value="Manga">Manga</option><option value="Splitter">Splitter</option><option value="Switch">Switch</option><option value="Otro">Otro</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="bloqueDevolucionAntena" style="display: none;">
+            <input id="macDevolucion" placeholder="Dirección MAC (Ej: A1:B2:C3...)" style="border: 2px solid #3b82f6;"/>
+            <p style="font-size: 12px; color: #666; margin-top: -5px; margin-bottom: 10px;">* La MAC se guardará como código y la categoría será "Antena CPE".</p>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label style="font-size: 12px; color: #666; font-weight: bold;">Técnico que devuelve (Opcional)</label>
+                <select id="selectTecnicoDevolucion">
+                    <option value="">-- Seleccione --</option>
+                </select>
+            </div>
+            <div class="col">
+                <label style="font-size: 12px; color: #666; font-weight: bold;">Oficina de recepción (Obligatorio)</label>
+                <select id="selectOficinaDevolucion">
+                    <option value="" disabled selected>-- Seleccione Oficina --</option>
+                </select>
+            </div>
+        </div>
+
+        <input id="clienteOLugarDevolucion" placeholder="Cliente o lugar (Obligatorio)" required style="margin-top: 10px;"/>
+        
+        <div class="row">
+            <div class="col">
+                <select id="razonDevolucion" onchange="toggleOtroDevolucion()">
+                    <option value="" disabled selected>Razón de Devolución</option><option value="Retiro">Retiro</option><option value="Dañado">Dañado</option><option value="Otro">Otro</option>
+                </select>
+            </div>
+        </div>
+        
+        <input id="razonOtroDevolucion" placeholder="Especifique la razón" style="display:none;"/>
+        <input id="tipoFallaInput" placeholder="Tipo de falla (ej: No enciende)" style="display:none;"/>
+        
+        <button class="primary" onclick="registrarDevolucion()" style="margin-top: 15px;">Registrar Devolución</button>    
+    </div>
+
+    <div class="card" id="reporteDevueltos" style="display:none;">
+        <h2>Reporte Detallado de Devoluciones</h2>
+        <button class="muted" onclick="mostrar('devueltos')" style="width:auto; padding:8px 15px; margin-bottom: 15px;">← Volver</button>
+        <div style="margin-bottom: 15px;">
+            <label for="filtroDevueltos">Filtrar por fecha:</label>
+            <select id="filtroDevueltos" onchange="cargarReporteDevueltos()">
+                <option value="total">Siempre</option><option value="today">Hoy</option><option value="7d" selected>Últimos 7 días</option><option value="30d">Últimos 30 días</option><option value="6m">Últimos 6 meses</option>
+            </select>
+            <input type="text" id="devueltosSearch" placeholder="Buscar por código, cliente o técnico..." onkeyup="cargarReporteDevueltos()" style="margin-top: 10px;"/> 
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Código</th>
+                    <th>Cliente / Lugar</th>
+                    <th>Técnico (Devuelve)</th>
+                    <th>Categoría</th>
+                    <th>Razón</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaDevueltos"></tbody>
+        </table>
+    </div>
+
+    <div class="card" id="inventario" style="display:none;">
+      <h2>Inventario General</h2>
+      <h3 id="inventarioTitulo">Artículos Sin Asignar</h3>
+      <input type="text" id="inventarioSearch" placeholder="Buscar..." onkeyup="invPage=1; cargarInventarioPaginado()" style="margin-bottom: 15px;"/> 
+      <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap: wrap;">
+          <button id="btnSinAsignar" class="primary" onclick="invFiltro='unassigned'; invPage=1; cargarInventarioPaginado()" style="width:auto; flex-grow: 1;">Sin Asignar</button>
+          <button id="btnAsignados" class="muted" onclick="invFiltro='assigned'; invPage=1; cargarInventarioPaginado()" style="width:auto; flex-grow: 1;">Asignados</button>
+          <button id="btnDevueltosInv" class="muted" onclick="invFiltro='returned'; invPage=1; cargarInventarioPaginado()" style="width:auto; flex-grow: 1; background: #fee2e2; color: #991b1b;">Devueltos</button>
+      </div>
+      <div class="row" style="margin-bottom: 15px; align-items: flex-end;">
+          <div class="col" style="flex: 1 1 180px;">
+              <select id="filtroInventarioFecha" onchange="invPage=1; cargarInventarioPaginado()">
+                  <option value="total">Todas las fechas</option><option value="today">Hoy</option><option value="7d" selected>7 días</option><option value="30d">30 días</option>
+              </select>
+          </div>
+          <div class="col" style="flex: 1 1 180px;"><select id="filtroInventarioCategoria" onchange="invPage=1; cargarInventarioPaginado()"><option value="total" selected>Todas las categorías</option></select></div>
+          
+          <div class="col" style="flex: 1 1 180px;">
+              <select id="filtroInventarioOficina" onchange="invPage=1; cargarInventarioPaginado()">
+                  <option value="total" selected>Todas las oficinas</option>
+              </select>
+          </div>
+          
+          <div class="col" style="flex: 1 1 200px; margin-left:auto;">
+              <button id="btnExportarCodigos" class="primary" onclick="imprimirCodigosDeBarraMasivo()" style="width:100%; padding:10px 15px; margin-top: 18px;">Exportar Códigos</button>
+          </div>
+      </div>
+      <table><thead><tr><th>Código</th><th>Nombre</th><th>Cat</th><th>Oficina</th><th>Técnico</th><th>Cliente</th><th>Fecha</th><th>Acciones</th></tr></thead><tbody id="tablaInventario"></tbody></table>
+      
+      <div class="pagination">
+          <button class="pagination-btn" onclick="cambiarPagina(-1)">❮ Anterior</button>
+          <span id="paginacionInfo" class="pagination-info">Página 1</span>
+          <button class="pagination-btn" onclick="cambiarPagina(1)">Siguiente ❯</button>
+      </div>
+    </div>
+
+    <div class="card" id="historial" style="display:none;">
+      <h2>Historial</h2>
+      <div style="margin-bottom: 15px;">
+        <select id="filtroHistorial" onchange="actualizarHistorial()">
+            <option value="total">Siempre</option><option value="today">Hoy</option><option value="7d" selected>7 días</option><option value="30d">30 días</option>
+        </select>
+      </div>
+      <table><thead><tr><th>Fecha</th><th>Acción</th><th>Código</th><th>Artículo</th><th>Técnico</th></tr></thead><tbody id="tablaHistorial"></tbody></table>
+    </div>
+
+    <div class="card" id="config" style="display:none;">
+      <h2>Configuración</h2>
+      <div class="config-nav">
+          <button onclick="switchConfigTab('conf_general')" id="btn_conf_general" title="General">&#9998;</button>
+          <button onclick="switchConfigTab('conf_users')" id="btn_conf_users" title="Usuarios">&#128100;</button>
+          <button onclick="switchConfigTab('conf_alerts')" id="btn_conf_alerts" title="Alertas">&#9888;</button>
+          <button onclick="switchConfigTab('conf_backup')" id="btn_conf_backup" title="Respaldo Cloud">&#9729;</button>
+          <button onclick="switchConfigTab('conf_print')" id="btn_conf_print" title="Etiquetas">&#128424;</button>
+          </div>
+      <div id="conf_general" class="config-tab-content">
+          <div class="config-section">
+              <h3>Personalización Dashboard</h3>
+              <p style="font-size: 14px; color: var(--muted);">Categorías en el Dashboard:</p>
+              <select id="config_cat_1"></select><select id="config_cat_2"></select><select id="config_cat_3"></select>
+              <button class="primary" onclick="guardarPersonalizacionDashboard()">Guardar</button>
+          </div>
+      </div>
+      <div id="conf_users" class="config-tab-content">
+          <div class="config-section">
+            <h3>Gestión de Técnicos</h3>
+            <input id="nuevoPersonal" placeholder="Nombre completo"/>
+            <button class="primary" onclick="agregarPersonal()">Agregar</button>
+            <div id="listaPersonal" style="margin-top:10px;"></div>
+          </div>
+          <div class="config-section">
+            <h3>Gestión de Oficinas</h3>
+            <input id="nuevaOficina" placeholder="Nombre de Oficina (ej: Centro, Norte)"/>
+            <button class="primary" onclick="agregarOficina()">Agregar Oficina</button>
+            <div id="listaOficinas" style="margin-top:10px;"></div>
+          </div>
+          <div class="config-section">
+            <h3>Usuarios del Sistema</h3>
+            <input id="nuevoUser" placeholder="Usuario"/>
+            <input id="nuevoPass" placeholder="Contraseña" type="password"/>
+            <div style="display:flex; justify-content:center; align-items:center; gap:15px; margin: 15px 0;">
+                <label style="cursor:pointer;"><input id="nuevoAdmin" type="checkbox"> Es Admin</label>
+                <button class="primary" onclick="crearUsuario()" style="width:auto; margin:0;">Crear Usuario</button>
+            </div>
+            <div id="listaUsuarios" style="margin-top:10px;"></div>
+            <h4 style="margin-top:25px; border-top:1px solid #eee; padding-top:15px;">Cambiar Contraseña</h4>
+            <div style="display:flex; gap:10px;">
+                <select id="selectUserChangePass" style="flex:1;"><option disabled selected>Seleccione Usuario</option></select>
+                <input id="newPassChange" placeholder="Nueva Contraseña" type="password" style="flex:1; margin:0;"/>
+            </div>
+            <button class="primary" onclick="cambiarPassword()" style="margin-top:10px;">Actualizar Contraseña</button>
+          </div>
+      </div>
+      <div id="conf_alerts" class="config-tab-content">
+          <div class="config-section">
+            <h3>Alertas de Stock</h3>
+            <label>Categoría</label><select id="alert_cat_select"></select>
+            <label>Mínimo antes de alertar</label><input type="number" id="alert_num_input" min="1">
+            <button class="primary" onclick="guardarConfiguracionAlerta()">Guardar Regla</button>
+            <div id="lista_alertas_configuradas"></div>
+          </div>
+          <div class="config-section">
+            <h3>Alertas por correo</h3>
+            <input id="smtpReceiver" placeholder="Correo Receptor">
+            <div class="row"><div class="col"><input id="smtpHost" placeholder="Servidor SMTP"></div><div class="col"><input id="smtpPort" placeholder="Puerto"></div></div>
+            <div style="display:flex; justify-content:center; margin:10px 0;">
+                <label style="cursor:pointer;"><input type="checkbox" id="smtpTLS"> Usar conexión segura (SSL/TLS)</label>
+            </div>
+            <input id="smtpFrom" placeholder="Remitente">
+            <input id="smtpUser" placeholder="Usuario SMTP">
+            <input id="smtpPass" type="password" placeholder="Contraseña SMTP">
+            <div style="display:flex; justify-content:center; gap:10px; margin-top:15px;">
+                <button class="primary" style="width:auto; margin:0;" onclick="guardarConfigCorreo()">Guardar</button>
+                <button class="muted" style="width:auto; margin:0;" onclick="probarCorreo()">Probar</button>
+            </div>
+          </div>
+      </div>
+      <div id="conf_backup" class="config-tab-content">
+          <div class="config-section">
+            <h3><span style="font-size:24px;">&#9729;</span> Respaldo Automático (Cloud)</h3>
+            <p style="color:#666; font-size:13px; margin-bottom:15px;">Configure el envío automático de la base de datos completa a su correo electrónico.</p>
+            <div class="row">
+                <div class="col">
+                    <label>Frecuencia de Respaldo (Obligatorio)</label>
+                    <select id="bk_frecuencia">
+                        <option value="24">Cada 24 Horas (Diario)</option>
+                        <option value="12">Cada 12 Horas</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <label>Hora de ejecución (Aprox)</label>
+                    <select id="bk_hora">
+                        <option value="00:00">00:00 AM</option><option value="01:00">01:00 AM</option><option value="02:00">02:00 AM</option><option value="03:00">03:00 AM</option>
+                        <option value="04:00">04:00 AM</option><option value="05:00">05:00 AM</option><option value="06:00">06:00 AM</option><option value="07:00">07:00 AM</option>
+                        <option value="08:00">08:00 AM</option><option value="09:00">09:00 AM</option><option value="10:00">10:00 AM</option><option value="11:00">11:00 AM</option>
+                        <option value="12:00">12:00 PM</option><option value="13:00">01:00 PM</option><option value="14:00">02:00 PM</option><option value="15:00">03:00 PM</option>
+                        <option value="16:00">04:00 PM</option><option value="17:00">05:00 PM</option><option value="18:00">06:00 PM</option><option value="19:00">07:00 PM</option>
+                        <option value="20:00">08:00 PM</option><option value="21:00">09:00 PM</option><option value="22:00">10:00 PM</option><option value="23:00">11:00 PM</option>
+                    </select>
+                </div>
+            </div>
+            <h4 style="margin-top:20px;">Configuración SMTP (Correo)</h4>
+            <input id="bkReceiver" placeholder="Correo donde llegará el backup (Receptor)">
+            <div class="row"><div class="col"><input id="bkHost" placeholder="Servidor SMTP"></div><div class="col"><input id="bkPort" placeholder="Puerto"></div></div>
+            <div style="display:flex; justify-content:center; margin:10px 0;">
+                <label style="cursor:pointer;"><input type="checkbox" id="bkTLS"> Usar conexión segura (SSL/TLS)</label>
+            </div>
+            <input id="bkFrom" placeholder="Remitente (De parte de...)">
+            <input id="bkUser" placeholder="Usuario SMTP">
+            <input id="bkPass" type="password" placeholder="Contraseña SMTP">
+            <div style="display:flex; justify-content:center; gap:10px; margin-top:25px;">
+                <button class="primary" style="width:auto; margin:0;" onclick="guardarConfigBackup()">💾 Guardar Configuración</button>
+                <button class="muted" style="width:auto; margin:0; background:#dbeafe; color:#1e40af;" onclick="ejecutarBackupManual()">🚀 Probar y Enviar Ahora</button>
+            </div>
+            <p id="lastBackupMsg" style="text-align:center; font-size:12px; color:#888; margin-top:10px;"></p>
+          </div>
+
+          <div class="config-section" style="margin-top: 40px; border-top: 3px solid #dc2626; padding-top: 20px; background: #fff5f5; border-radius: 8px;">
+            <h3 style="color: #dc2626;"><span style="font-size:24px;">&#9888;</span> Zona de Peligro: Restaurar</h3>
+            <p style="color: #7f1d1d; font-size:13px; margin-bottom:15px;">
+                <strong>ADVERTENCIA:</strong> Al restaurar, se borrarán todos los datos actuales y se reemplazarán por los del archivo de respaldo. Esta acción es irreversible.
+            </p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items: center;">
+                <input type="file" id="fileBackupRestore" accept=".zip" style="background: white;"/>
+                <button class="danger" onclick="iniciarRestauracion()" style="width:auto; margin:0;">⚠️ RESTAURAR BASE DE DATOS</button>
+        </div>
+      </div> </div> <div id="conf_print" class="config-tab-content">
+          <div class="config-section">
+            <h3>Configuración de Etiquetas</h3>
+            <p style="color:#666; font-size:13px; margin-bottom:15px;">Defina las dimensiones de su papel térmico en milímetros (mm).</p>
+            <div class="row">
+                <div class="col">
+                    <label>Ancho (mm)</label>
+                    <input id="lblWidth" type="number" value="50">
+                </div>
+                <div class="col">
+                    <label>Alto (mm)</label>
+                    <input id="lblHeight" type="number" value="25">
+                </div>
+            </div>
+            <button class="primary" onclick="guardarConfigImpresion()">Guardar Medidas</button>
+          </div>
+      </div>
+</div>
+<div id="customModal"><div class="modal-content"><h3 id="modalTitle">Aviso</h3><p id="modalMessage"></p><div id="modalActions"><button id="modalBtnCancel" class="muted" style="display:none;">Cancelar</button><button id="modalBtnConfirm" class="primary">Aceptar</button></div></div></div>
+<div id="modalMoverOficina"><div class="modal-content"><h3>Mover de Oficina</h3><p>Mover artículo: <strong id="txtMoverCodigo"></strong></p><label>Seleccione nueva ubicación:</label><select id="selNuevaOficina"></select><div id="modalActions"><button class="muted" onclick="document.getElementById('modalMoverOficina').classList.remove('show')">Cancelar</button><button class="primary" onclick="guardarMovimientoOficina()">Confirmar Movimiento</button></div></div></div>
+<div id="modalReingreso">
+    <div class="modal-content">
+        <h3>Reingresar al Inventario</h3>
+        <p>Artículo: <strong id="txtReingresoCodigo"></strong></p>
+        <label>Seleccione Oficina de Destino:</label>
+        <select id="selOficinaReingreso"></select>
+        <div id="modalActions">
+            <button class="muted" onclick="document.getElementById('modalReingreso').classList.remove('show')">Cancelar</button>
+            <button class="primary" onclick="confirmarReingreso()" style="background:#10b981;">Confirmar Reingreso</button>
+        </div>
+    </div>
+</div>
+<div id="barcodePrintArea" style="display: none;"></div>
+<script>
+const API_URL = 'api.php';
+let inventario=[],historial=[],personal=[],usuarios=[],devoluciones=[],oficinas=[];
+let dashboardConfig=["ONU","Router","Cable Drop"], alertThresholds={}, smtpConfig={}, printConfig={width:50, height:25};
+let currentUser=null, graficoTecnicosInstance=null, graficoReportePersonalInstance=null;
+let invPage = 1, invTotalPages = 1, invFiltro = 'unassigned';
+// Función para verificar si una fecha cumple con el filtro seleccionado
+function cumpleFiltroFecha(fechaStr, filtro) {
+    if (filtro === 'total' || !fechaStr) return true;
+    
+    // Convertir fecha de MySQL (YYYY-MM-DD HH:MM:SS) a Objeto JS
+    const fechaItem = new Date(fechaStr.replace(/-/g, '/')); // Reemplazo para compatibilidad Safari/Firefox
+    const hoy = new Date();
+    
+    // Resetear horas para comparar solo días
+    hoy.setHours(23, 59, 59, 999); 
+    
+    const diffTime = Math.abs(hoy - fechaItem);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+    if (filtro === 'today') {
+        const fechaHoyStr = new Date().toISOString().split('T')[0];
+        return fechaStr.startsWith(fechaHoyStr);
+    }
+    if (filtro === '7d') return diffDays <= 7;
+    if (filtro === '30d') return diffDays <= 30;
+    if (filtro === '6m') return diffDays <= 180;
+    
+    return true;
+}
+function escapeHtml(text) {
+  if (text == null) return "";
+  return text.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+}
+
+async function enviarAPI(action,payload){
+    try{
+        const res = await fetch(API_URL+'?action='+action,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        if (res.status === 403) { logout(); return {success:false, message:"Sesión expirada"}; }
+        return await res.json();
+    } catch(e){ return {success:false, message:"Error de red"}; }
+}
+
+async function login(){
+    const user=document.getElementById("loginUser").value.trim();
+    const pass=document.getElementById("loginPass").value.trim();
+    if(!user||!pass){showAlert("Faltan datos");return;}
+    try{
+        const res = await fetch(API_URL+'?action=login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({user:user,pass:pass})});
+        const data = await res.json();
+        if(data.success){ 
+            currentUser=data.user; 
+            localStorage.setItem("currentUser",JSON.stringify(currentUser)); 
+            iniciarSistema(); 
+        } else { showAlert(data.message||"Error de acceso"); }
+    }catch(e){showAlert("Error conectando");}
+}
+
+function iniciarSistema(){
+    document.getElementById("loginScreen").style.display="none"; document.getElementById("app").style.display="block"; document.getElementById("sidebar").style.display="flex";
+    const adminBtns=["sb_dashboard","sb_registrar","btnInventario","sb_historial","sb_reportes","btnConfig"];
+    if(currentUser.admin){
+        adminBtns.forEach(id=>document.getElementById(id).style.display="flex");
+        mostrar("dashboard");
+    }else{
+        adminBtns.forEach(id=>document.getElementById(id).style.display="none");
+        document.getElementById("sb_asignar").style.display="flex"; document.getElementById("sb_devueltos").style.display="flex";
+        mostrar("asignar");
+    }
+    cargarDatosDesdeDB();
+    checkAutoBackupService(); 
+}
+
+function logout(){ localStorage.removeItem("currentUser"); location.reload(); }
+
+async function cargarDatosDesdeDB(){
+    try{
+        const response = await fetch(API_URL+'?action=getAll');
+        if(response.status === 403) { logout(); return; }
+        const data = await response.json();
+        
+        historial=data.historial||[]; personal=data.personal||[]; usuarios=data.usuarios||[]; devoluciones=data.devoluciones||[]; oficinas=data.oficinas||[]; 
+        const categoriasResumen = data.categorias_resumen || [];
+
+        if(data.config){
+            if(data.config.dashboardConfig) dashboardConfig=data.config.dashboardConfig;
+            if(data.config.alertThresholds) alertThresholds = (typeof data.config.alertThresholds==='string')?JSON.parse(data.config.alertThresholds):data.config.alertThresholds;
+            if(data.config.smtpConfig) smtpConfig = (typeof data.config.smtpConfig==='string')?JSON.parse(data.config.smtpConfig):data.config.smtpConfig;
+            if(data.config.backupConfig) { let bkConf = (typeof data.config.backupConfig === 'string') ? JSON.parse(data.config.backupConfig) : data.config.backupConfig; rellenarFormBackup(bkConf); }
+        }
+        if(data.config.printConfig) { printConfig = (typeof data.config.printConfig === 'string') ? JSON.parse(data.config.printConfig) : data.config.printConfig; document.getElementById("lblWidth").value = printConfig.width; document.getElementById("lblHeight").value = printConfig.height; }
+        const cats=[...new Set(categoriasResumen.map(i=>i.categoria))].concat(Array.from(document.getElementById("categoria").options).map(o=>o.value)).filter(v=>v!=="Otro");
+        const uniqueCats = [...new Set(cats)].sort();
+        ["config_cat_1","config_cat_2","config_cat_3"].forEach((id,i)=>{const s=document.getElementById(id);s.innerHTML="";uniqueCats.forEach(c=>s.innerHTML+=`<option value="${c}">${c}</option>`);if(dashboardConfig[i])s.value=dashboardConfig[i];});
+        const al=document.getElementById("alert_cat_select");al.innerHTML="";uniqueCats.forEach(c=>al.innerHTML+=`<option value="${c}">${c}</option>`);
+        
+        const fi=document.getElementById("filtroInventarioCategoria"); const valPrev = fi.value; fi.innerHTML="<option value='total'>Todas las categorías</option>"; uniqueCats.forEach(c=>fi.innerHTML+=`<option value="${c}">${c}</option>`); fi.value = valPrev;
+
+        if(document.getElementById('dashboard').style.display === 'block') generarDashboard(categoriasResumen);
+        if(document.getElementById('inventario').style.display === 'block') cargarInventarioPaginado();
+        if(data.grafica_tecnicos) generarGraficaTecnicos(data.grafica_tecnicos);
+        cargarOficinas();
+
+    }catch(e){console.error(e);}
+}
+
+function mostrar(sec){
+    document.querySelectorAll('.container > .card').forEach(c=>c.style.display='none');
+    document.getElementById(sec).style.display='block';
+    document.querySelectorAll('#sidebar button').forEach(b=>b.classList.remove('active-sidebar'));
+    const map={'dashboard':'sb_dashboard','registrar':'sb_registrar','asignar':'sb_asignar','completarOrden':'sb_completar','devueltos':'sb_devueltos','reporteDevueltos':'sb_devueltos','inventario':'btnInventario','historial':'sb_historial','asignacionesPersonal':'sb_reportes','config':'btnConfig'};
+    if(map[sec]) document.getElementById(map[sec]).classList.add('active-sidebar');
+    
+    if(sec==='dashboard') cargarDatosDesdeDB(); 
+    if(sec==='inventario') { invPage=1; cargarInventarioPaginado(); }
+    if(sec==='historial') actualizarHistorial();
+    if(sec==='asignacionesPersonal'){llenarSelectPersonal();mostrarReporteAsignaciones();}
+    if(sec==='registrar') document.getElementById("codigo").value=generarCodigo();
+    if(sec==='asignar') llenarSelectPersonal();
+    if(sec==='reporteDevueltos') cargarReporteDevueltos();
+    if(sec==='config'){cargarUsuarios();cargarPersonal();cargarOficinas();cargarConfiguracionCorreo();switchConfigTab('conf_general');}
+    
+    if(sec==='devueltos') {
+        const sTec = document.getElementById("selectTecnicoDevolucion");
+        sTec.innerHTML = "<option value=''>-- Nadie / Externo --</option>";
+        personal.forEach(p => sTec.innerHTML += `<option value="${p}">${p}</option>`);
+
+        const sOfi = document.getElementById("selectOficinaDevolucion");
+        sOfi.innerHTML = "<option value='' disabled selected>-- Seleccione Oficina --</option>";
+        oficinas.forEach(o => sOfi.innerHTML += `<option value="${o}">${o}</option>`);
+    }
+}
+
+function switchConfigTab(tabId){
+    document.querySelectorAll('.config-tab-content').forEach(el=>el.classList.remove('active'));
+    document.querySelectorAll('.config-nav button').forEach(el=>el.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    document.getElementById('btn_'+tabId).classList.add('active');
+    if(tabId==='conf_alerts') cargarListaAlertasConfiguradas();
+}
+
+async function cargarInventarioPaginado() {
+    const search = document.getElementById("inventarioSearch").value;
+    const cat = document.getElementById("filtroInventarioCategoria").value;
+    const ofi = document.getElementById("filtroInventarioOficina").value;
+    const fechaFiltro = document.getElementById("filtroInventarioFecha").value;
+    
+    // Referencias a botones
+    const btn1=document.getElementById("btnSinAsignar"); 
+    const btn2=document.getElementById("btnAsignados");
+    const btn3=document.getElementById("btnDevueltosInv");
+    
+    // Reset visual botones
+    btn1.className='muted'; btn2.className='muted'; btn3.className='muted';
+    btn3.style.background = "#fee2e2"; btn3.style.color = "#991b1b"; 
+    
+    // Lógica de pestañas
+    if(invFiltro==='unassigned'){ 
+        btn1.className='primary'; 
+        document.getElementById("inventarioTitulo").innerText="Sin Asignar"; 
+    } else if(invFiltro === 'assigned') { 
+        btn2.className='primary'; 
+        document.getElementById("inventarioTitulo").innerText="Asignados"; 
+    } else if(invFiltro === 'returned') {
+        btn3.className='primary';
+        btn3.style.background = "#dc2626"; btn3.style.color = "#fff"; 
+        document.getElementById("inventarioTitulo").innerText="Artículos Devueltos (En espera de reingreso)";
+    }
+    
+    const tb = document.getElementById("tablaInventario"); 
+    tb.innerHTML = "<tr><td colspan='8' style='text-align:center;'>Cargando...</td></tr>";
+    
+    // Llamada a la API
+    const res = await enviarAPI('getInventarioPaginado', { pagina: invPage, filtro: invFiltro, busqueda: search, categoria: cat, oficina: ofi, fecha_filtro: fechaFiltro });
+    
+    tb.innerHTML = "";
+    if(res.items && res.items.length > 0) {
+        inventario = res.items; 
+        res.items.forEach(i => {
+            let accionesHtml = "";
+            let columnaExtra = escapeHtml(i.cliente||'-'); // Por defecto columna Cliente
+            let columnaTecnico = escapeHtml(i.persona||'-');
+
+            if(invFiltro === 'unassigned'){ 
+                accionesHtml = `<button class="primary" style="padding:2px 8px; width:auto; margin-right:5px; background:#f59e0b;" onclick="event.stopPropagation();abrirModalMover('${i.codigo}')" title="Mover a otra oficina">⇄</button>`; 
+                accionesHtml += `<button class="deleteBtnTable" onclick="event.stopPropagation();generarEImprimirCodigoBarra('${i.codigo}')">&#128203;</button> <button class="deleteBtnTable" onclick="eliminarArticulo('${i.codigo}')">X</button>`;
+            } 
+            else if (invFiltro === 'assigned') {
+                accionesHtml = `<button class="deleteBtnTable" onclick="eliminarArticulo('${i.codigo}')">X</button>`;
+            }
+            else if (invFiltro === 'returned') {
+                // Lógica especial para mostrar Razón en devueltos
+                columnaExtra = `<b>Cl:</b> ${escapeHtml(i.cliente||'-')}<br><i style='color:#dc2626; font-size:11px;'>${escapeHtml(i.uso||'')}</i>`;
+                accionesHtml = `<button class="primary" style="padding:4px 8px; width:auto; background:#10b981; font-size:12px;" onclick="abrirModalReingreso('${i.codigo}', '${escapeHtml(i.nombre)}', '${escapeHtml(i.categoria)}')">♻️ Reingresar</button>`;
+                accionesHtml += ` <button class="deleteBtnTable" onclick="eliminarArticulo('${i.codigo}')">X</button>`;
+            }
+
+            tb.innerHTML+=`<tr>
+                <td>${escapeHtml(i.codigo)}</td>
+                <td>${escapeHtml(i.nombre)}</td>
+                <td>${escapeHtml(i.categoria)}</td>
+                <td>${escapeHtml(i.oficina||'-')}</td>
+                <td>${columnaTecnico}</td> 
+                <td>${columnaExtra}</td>
+                <td>${i.fecha?i.fecha.split(' ')[0]:'-'}</td>
+                <td>${accionesHtml}</td>
+            </tr>`;
+        });
+        document.getElementById("paginacionInfo").innerText = `Página ${res.pagina_actual} de ${res.paginas} (Total: ${res.total_items})`;
+        invTotalPages = res.paginas;
+    } else { 
+        tb.innerHTML = "<tr><td colspan='8' style='text-align:center;'>No se encontraron resultados.</td></tr>"; 
+        document.getElementById("paginacionInfo").innerText = `Página 0 de 0`; 
+        invTotalPages = 1; 
+    }
+}   
+    
+    
+
+    
+
+
+// --- NUEVAS FUNCIONES PARA EL MODAL DE REINGRESO ---
+let codigoParaReingreso = null;
+let datosReingreso = {};
+
+function abrirModalReingreso(codigo, nombre, categoria) {
+    codigoParaReingreso = codigo;
+    datosReingreso = { nombre: nombre, categoria: categoria };
+    
+    document.getElementById("txtReingresoCodigo").innerText = codigo + " - " + nombre;
+    
+    const s = document.getElementById("selOficinaReingreso");
+    s.innerHTML = "<option value='' selected>Sin Oficina (General)</option>";
+    oficinas.forEach(o => { s.innerHTML += `<option value="${o}">${o}</option>`; });
+    
+    document.getElementById("modalReingreso").classList.add("show");
+}
+
+async function confirmarReingreso() {
+    if(!codigoParaReingreso) return;
+    const oficinaDestino = document.getElementById("selOficinaReingreso").value;
+    const resp = await enviarAPI('reutilizarArticulo', { codigo: codigoParaReingreso, nombre: datosReingreso.nombre, categoria: datosReingreso.categoria, oficina: oficinaDestino });
+    if(resp.success) {
+        document.getElementById("modalReingreso").classList.remove("show");
+        showAlert("✅ Artículo reingresado a: " + (oficinaDestino || "General"));
+        cargarInventarioPaginado();
+        if(document.getElementById('dashboard').style.display === 'block') cargarDatosDesdeDB();
+    } else { showAlert("❌ Error al reingresar"); }
+}
+function cambiarPagina(delta) { const nuevaPagina = invPage + delta; if(nuevaPagina >= 1 && nuevaPagina <= invTotalPages) { invPage = nuevaPagina; cargarInventarioPaginado(); } }
+
+function generarDashboard(dataResumen){
+    const globalCounts = {}; const alertsByOffice = {};
+    dataResumen.forEach(r => {
+        const cat = r.categoria; const disp = parseInt(r.disponibles); const total = parseInt(r.total); const ofi = r.oficina ? r.oficina : "General";
+        if(!globalCounts[cat]) globalCounts[cat] = { total: 0, disp: 0 }; globalCounts[cat].total += total; globalCounts[cat].disp += disp;
+        const umbral = alertThresholds[cat] || 5;
+        if(disp <= umbral) { if (!alertsByOffice[ofi]) alertsByOffice[ofi] = { empty: [], low: [] }; if(disp === 0) alertsByOffice[ofi].empty.push(cat); else alertsByOffice[ofi].low.push(`${cat} (${disp})`); }
+    });
+    [0,1,2].forEach(i => { const cat = dashboardConfig[i]; if(cat) { document.getElementById(`stat_box_${i+1}_title`).textContent = cat + " Disp. (Total)"; document.getElementById(`stat_box_${i+1}_num`).textContent = (globalCounts[cat] ? globalCounts[cat].disp : 0); } });
+    const div = document.getElementById("listasCategorias"); div.innerHTML="";
+    Object.keys(globalCounts).forEach(cat => {
+        const d = globalCounts[cat]; let pct = (d.disp / 50) * 100; if(pct > 100) pct = 100;
+        let colorClass = 'color-green'; if(d.disp < 10) colorClass = 'color-red'; else if (d.disp < 25) colorClass = 'color-yellow';
+        div.innerHTML+=`<div class="cat-row"><div style="display:flex;justify-content:space-between"><span>${cat}</span><span>${d.disp} disp.</span></div><div class="cat-bar-container"><div class="cat-bar ${colorClass}" style="width:${pct}%"></div></div></div>`;
+    });
+    const alertsContainer = document.getElementById("alertasContainer"); alertsContainer.innerHTML = "";
+    Object.keys(alertsByOffice).forEach(ofi => {
+        const data = alertsByOffice[ofi];
+        if (data.empty.length > 0) {
+            let html = `<div class="office-alert-card"><div class="office-title" style="display:flex; align-items:center; gap:10px;"><span style="font-size:24px; line-height:1;">&#10008;</span><span>AGOTADO EN ${ofi.toUpperCase()}</span></div><ul class="alert-list">`;
+            data.empty.forEach(item => html += `<li><span>${item}</span> <span class="tag-agotado">AGOTADO</span></li>`); html += `</ul></div>`; alertsContainer.innerHTML += html;
+        }
+        if (data.low.length > 0) {
+            let html = `<div class="office-alert-card warning"><div class="office-title" style="display:flex; align-items:center; gap:10px;"><span style="font-size:24px; line-height:1;">&#9888;</span><span>STOCK BAJO EN ${ofi.toUpperCase()}</span></div><ul class="alert-list">`;
+            data.low.forEach(item => { const parts = item.match(/(.*) \((\d+)\)/); const name = parts ? parts[1] : item; const qty = parts ? parts[2] : "?"; html += `<li><span>${name}</span> <span class="tag-bajo">${qty} un.</span></li>`; }); html += `</ul></div>`; alertsContainer.innerHTML += html;
+        }
+    });
+}
+
+function generarGraficaTecnicos(datos){
+    if(!datos) return;
+    const labels = datos.map(d => d.persona); const values = datos.map(d => d.total);
+    const ctx=document.getElementById('graficoTecnicos').getContext('2d');
+    if(graficoTecnicosInstance)graficoTecnicosInstance.destroy();
+    graficoTecnicosInstance=new Chart(ctx,{ type:'bar', data:{ labels: labels, datasets:[{ label:'Asignados (7 días)', data: values, backgroundColor:'#3b82f6' }] }, options:{responsive:true,maintainAspectRatio:false} });
+}
+
+function cargarPersonal(){const l=document.getElementById("listaPersonal");l.innerHTML="";personal.forEach(p=>l.innerHTML+=`<div class="userRow"><span>${p}</span><button class="deleteBtn" onclick="eliminarPersonal('${p}')">X</button></div>`);}
+function cargarUsuarios(){ const l=document.getElementById("listaUsuarios"); l.innerHTML=""; const s=document.getElementById("selectUserChangePass"); s.innerHTML="<option disabled selected>Seleccione Usuario</option>"; usuarios.forEach(u=>{ let btnPromote = ""; if(!u.admin) { btnPromote = `<button class="primary" style="padding:4px 8px; margin-right:5px; font-size:12px; width:auto;" onclick="promoverUsuario('${u.user}')" title="Hacer Admin">⬆️ Admin</button>`; } l.innerHTML+=`<div class="userRow"><span>${u.user} (${u.admin?'Admin':'User'})</span><div style="display:flex; align-items:center;">${btnPromote}<button class="deleteBtn" onclick="eliminarUsuario('${u.user}')">X</button></div></div>`; s.innerHTML+=`<option value="${u.user}">${u.user}</option>`; }); }
+function promoverUsuario(u){ showConfirm(`¿Convertir a ${u} en Administrador?`, async(si)=>{ if(si){ await enviarAPI('gestionUsuarios',{subAction:'promote',user:u}); await cargarDatosDesdeDB(); cargarUsuarios(); showAlert("Realizado"); } }); }
+function eliminarPersonal(n){ showConfirm(`¿Eliminar al técnico ${n}? Esta acción es irrevocable.`,async(si)=>{ if(si){ await enviarAPI('gestionPersonal',{subAction:'del',nombre:n}); await cargarDatosDesdeDB(); cargarPersonal(); showAlert("Realizado"); } }); }
+function agregarPersonal(){ const val = document.getElementById("nuevoPersonal").value; enviarAPI('gestionPersonal',{subAction:'add',nombre:val}).then(async ()=>{ await cargarDatosDesdeDB(); cargarPersonal(); document.getElementById("nuevoPersonal").value = ""; showAlert("Guardado"); }); }
+function cargarOficinas(){ const l=document.getElementById("listaOficinas"); l.innerHTML=""; oficinas.forEach(o=>l.innerHTML+=`<div class="userRow"><span>${o}</span><button class="deleteBtn" onclick="eliminarOficina('${o}')">X</button></div>`); const sReg=document.getElementById("registroOficina"); const valReg = sReg.value; sReg.innerHTML="<option value='' selected>Sin Oficina (General)</option>"; oficinas.forEach(o=>sReg.innerHTML+=`<option value="${o}">${o}</option>`); sReg.value = valReg; const sFil=document.getElementById("filtroInventarioOficina"); const valFil = sFil.value; sFil.innerHTML="<option value='total' selected>Todas las oficinas</option>"; oficinas.forEach(o=>sFil.innerHTML+=`<option value="${o}">${o}</option>`); sFil.value = valFil; }
+function agregarOficina(){ const val = document.getElementById("nuevaOficina").value.trim(); if(!val) return; enviarAPI('gestionOficinas',{subAction:'add',nombre:val}).then(async ()=>{ await cargarDatosDesdeDB(); cargarOficinas(); document.getElementById("nuevaOficina").value = ""; showAlert("Oficina Guardada"); }); }
+function eliminarOficina(n){ showConfirm(`¿Eliminar oficina ${n}?`,async(si)=>{ if(si){ await enviarAPI('gestionOficinas',{subAction:'del',nombre:n}); await cargarDatosDesdeDB(); cargarOficinas(); showAlert("Eliminada"); } }); }
+function crearUsuario(){ enviarAPI('gestionUsuarios',{subAction:'add',user:document.getElementById("nuevoUser").value,pass:document.getElementById("nuevoPass").value,admin:document.getElementById("nuevoAdmin").checked}).then(async ()=>{ await cargarDatosDesdeDB(); cargarUsuarios(); document.getElementById("nuevoUser").value=""; document.getElementById("nuevoPass").value=""; showAlert("Usuario Creado"); }); }
+function eliminarUsuario(u){ showConfirm(`¿Eliminar el usuario ${u}? Esta acción es irrevocable.`,async(si)=>{ if(si){ await enviarAPI('gestionUsuarios',{subAction:'del',user:u}); await cargarDatosDesdeDB(); cargarUsuarios(); showAlert("Realizado"); } }); }
+function eliminarConfiguracionAlerta(c){ showConfirm(`¿Eliminar alerta de ${c}?`,async(si)=>{ if(si){ delete alertThresholds[c]; await enviarAPI('guardarConfig',{clave:'alertThresholds',valor:alertThresholds}); cargarListaAlertasConfiguradas(); showAlert("Realizado"); cargarDatosDesdeDB(); } }); }
+async function guardarPersonalizacionDashboard(){ const v=[document.getElementById("config_cat_1").value,document.getElementById("config_cat_2").value,document.getElementById("config_cat_3").value]; await enviarAPI('guardarConfig',{clave:'dashboardConfig',valor:v}); dashboardConfig=v; cargarDatosDesdeDB(); showAlert("Guardado"); }
+async function guardarConfiguracionAlerta(){ const c=document.getElementById("alert_cat_select").value,n=parseInt(document.getElementById("alert_num_input").value); alertThresholds[c]=n; await enviarAPI('guardarConfig',{clave:'alertThresholds',valor:alertThresholds}); cargarListaAlertasConfiguradas(); showAlert("Guardado"); cargarDatosDesdeDB(); }
+async function cambiarPassword() { const u = document.getElementById("selectUserChangePass").value, p = document.getElementById("newPassChange").value; if(!u || !p) { showAlert("Faltan datos"); return; } await enviarAPI('gestionUsuarios', {subAction:'changePass', user:u, pass:p}); document.getElementById("newPassChange").value = ""; showAlert("Contraseña actualizada"); }
+function llenarSelectPersonal(){const s=document.getElementById("persona");s.innerHTML="<option disabled selected>Seleccione Técnico</option>";personal.forEach(p=>s.innerHTML+=`<option value="${p}">${p}</option>`);const s2=document.getElementById("selectPersonalAsignaciones");s2.innerHTML="<option disabled selected>Seleccione Técnico</option>";personal.forEach(p=>s2.innerHTML+=`<option value="${p}">${p}</option>`);}
+function eliminarArticulo(code){showConfirm("¿Eliminar?",async(si)=>{if(si){await enviarAPI('eliminarArticulo',{codigo:code});cargarInventarioPaginado();}});}
+function cargarListaAlertasConfiguradas(){const l=document.getElementById("lista_alertas_configuradas");l.innerHTML="";if(!alertThresholds||Object.keys(alertThresholds).length===0){l.innerHTML="<div style='padding:10px;color:#666;font-style:italic;'>Defecto: 5</div>";return;}Object.keys(alertThresholds).forEach(k=>{l.innerHTML+=`<div class="userRow"><span>${k}: < ${alertThresholds[k]}</span><button class="deleteBtn" onclick="eliminarConfiguracionAlerta('${k}')">X</button></div>`;});}
+async function guardarConfigCorreo(){const s={receiver:document.getElementById("smtpReceiver").value,host:document.getElementById("smtpHost").value,port:document.getElementById("smtpPort").value,tls:document.getElementById("smtpTLS").checked,from:document.getElementById("smtpFrom").value,user:document.getElementById("smtpUser").value,pass:document.getElementById("smtpPass").value};await enviarAPI('guardarConfig',{clave:'smtpConfig',valor:s});smtpConfig=s;showAlert("SMTP Guardado");}
+async function probarCorreo(){const s={receiver:document.getElementById("smtpReceiver").value,host:document.getElementById("smtpHost").value,port:document.getElementById("smtpPort").value,tls:document.getElementById("smtpTLS").checked,from:document.getElementById("smtpFrom").value,user:document.getElementById("smtpUser").value,pass:document.getElementById("smtpPass").value};if(!s.host||!s.user){showAlert("Faltan datos SMTP");return;}showAlert("Enviando...");const r=await enviarAPI('testSMTP',{config:s});if(r.success)showAlert("✅ Correo enviado");else showAlert("Error: "+r.message);}
+function cargarConfiguracionCorreo(){if(!smtpConfig)return;document.getElementById("smtpHost").value=smtpConfig.host||"";document.getElementById("smtpPort").value=smtpConfig.port||"";document.getElementById("smtpUser").value=smtpConfig.user||"";document.getElementById("smtpFrom").value=smtpConfig.from||"";document.getElementById("smtpReceiver").value=smtpConfig.receiver||"";document.getElementById("smtpPass").value=smtpConfig.pass||"";document.getElementById("smtpTLS").checked=smtpConfig.tls||false;}
+function cargarPersonalizacionDashboard(){const cats=[...new Set(inventario.map(i=>i.categoria))].concat(Array.from(document.getElementById("categoria").options).map(o=>o.value)).filter(v=>v!=="Otro");["config_cat_1","config_cat_2","config_cat_3"].forEach((id,i)=>{const s=document.getElementById(id);s.innerHTML="";cats.forEach(c=>s.innerHTML+=`<option value="${c}">${c}</option>`);if(dashboardConfig[i])s.value=dashboardConfig[i];});const al=document.getElementById("alert_cat_select");al.innerHTML="";cats.forEach(c=>al.innerHTML+=`<option value="${c}">${c}</option>`);}
+function cargarConfiguracionAlertas(){cargarPersonalizacionDashboard();cargarListaAlertasConfiguradas();}
+
+// LOGICA BACKUP CLOUD
+function rellenarFormBackup(conf) {
+    if(!conf) return;
+    document.getElementById("bkHost").value = conf.host || ""; document.getElementById("bkPort").value = conf.port || ""; document.getElementById("bkUser").value = conf.user || "";
+    document.getElementById("bkPass").value = conf.pass || ""; document.getElementById("bkFrom").value = conf.from || ""; document.getElementById("bkReceiver").value = conf.receiver || "";
+    document.getElementById("bkTLS").checked = conf.tls || false; document.getElementById("bk_frecuencia").value = conf.frecuencia || "24"; document.getElementById("bk_hora").value = conf.hora || "02:00";
+    if(conf.ultimo_backup) { const date = new Date(conf.ultimo_backup * 1000); document.getElementById("lastBackupMsg").innerText = "Último respaldo exitoso: " + date.toLocaleString(); } 
+    else { document.getElementById("lastBackupMsg").innerText = "No hay registros de respaldos previos."; }
+}
+async function guardarConfigBackup() {
+    const datos = { host: document.getElementById("bkHost").value, port: document.getElementById("bkPort").value, user: document.getElementById("bkUser").value, pass: document.getElementById("bkPass").value, from: document.getElementById("bkFrom").value, receiver: document.getElementById("bkReceiver").value, tls: document.getElementById("bkTLS").checked, frecuencia: document.getElementById("bk_frecuencia").value, hora: document.getElementById("bk_hora").value };
+    if(!datos.host || !datos.receiver || !datos.user) { showAlert("Complete los campos obligatorios SMTP"); return; }
+    const res = await enviarAPI('guardarConfigBackup', datos); if(res.success) { showAlert("Configuración de Respaldo Guardada"); cargarDatosDesdeDB(); } else { showAlert("Error al guardar"); }
+}
+async function ejecutarBackupManual() { showConfirm("¿Generar y enviar respaldo ahora?", async (si) => { if(si) { showAlert("Generando backup y enviando... Por favor espere."); const res = await enviarAPI('ejecutarBackup', {}); if(res.success) { showAlert("✅ Backup enviado correctamente."); cargarDatosDesdeDB(); } else { showAlert("❌ Error: " + res.message); } } }); }
+async function checkAutoBackupService() {
+    if(!currentUser || !currentUser.admin) return;
+    try { const res = await enviarAPI('checkAutoBackup', {}); if(res.run) { console.log("Ejecutando Backup Automático..."); await enviarAPI('ejecutarBackup', {}); console.log("Backup Finalizado"); } } catch(e) { console.error("Error checking backup", e); }
+}
+async function guardarConfigImpresion() {
+    const w = document.getElementById("lblWidth").value;
+    const h = document.getElementById("lblHeight").value;
+
+    if (!w || !h || w <= 0 || h <= 0) {
+        showAlert("Por favor ingrese medidas válidas mayores a 0.");
+        return;
+    }
+
+    const nuevaConfig = { width: w, height: h };
+
+    // Enviamos a la API usando la acción genérica 'guardarConfig' que ya tienes implementada
+    const res = await enviarAPI('guardarConfig', { clave: 'printConfig', valor: nuevaConfig });
+
+    if (res.success) {
+        printConfig = nuevaConfig; // Actualizamos la variable global
+        showAlert("✅ Medidas de etiqueta guardadas: " + w + "mm x " + h + "mm");
+    } else {
+        showAlert("❌ Error al guardar la configuración.");
+    }
+}
+setInterval(checkAutoBackupService, 300000); 
+
+// FUNCION RESTAURAR BACKUP
+async function iniciarRestauracion() {
+    const fileInput = document.getElementById('fileBackupRestore');
+    if (!fileInput.files || fileInput.files.length === 0) { showAlert("Seleccione un archivo ZIP primero."); return; }
+    const file = fileInput.files[0];
+    showConfirm("⚠️ ¿ESTÁS SEGURO?<br>Esta acción borrará TODOS los datos actuales y los reemplazará por el contenido del respaldo. No se puede deshacer.", async (si) => {
+        if(si) {
+            const formData = new FormData(); formData.append('backupFile', file); showAlert("Restaurando base de datos... Espere.");
+            try { const response = await fetch(API_URL + '?action=restoreBackup', { method: 'POST', body: formData }); const data = await response.json(); if(data.success) { showAlert("✅ Base de datos restaurada correctamente. El sistema se recargará."); setTimeout(() => location.reload(), 3000); } else { showAlert("❌ Error: " + data.message); } } catch (e) { showAlert("Error de conexión al restaurar."); }
+        }
+    });
+}
+
+// REPORTES Y DEVOLUCIONES
+function cargarReporteDevueltos(){ 
+    const tb=document.getElementById("tablaDevueltos"); tb.innerHTML=""; 
+    const sVal=document.getElementById("devueltosSearch").value.toLowerCase(); 
+    devoluciones.forEach(d=>{ 
+        if(sVal) { const txt = (d.codigo + d.clienteOLugar + d.categoria + d.razon + (d.tecnico||"")).toLowerCase(); if(!txt.includes(sVal)) return; } 
+        const style = d.reutilizado ? "background:#f0fff4;" : ""; 
+        const btn = d.reutilizado ? "<span style='color:green;font-weight:bold;font-size:12px;'>Reingresado</span>" : `<button class="primary" style="padding:4px 8px; background:green; font-size:12px; width:auto;" onclick="reutilizarArticulo('${d.codigo}')">♻️ Reingresar</button>`; 
+        tb.innerHTML+=`<tr style="${style}">
+            <td>${d.fecha.split(' ')[0]}</td>
+            <td>${d.codigo}</td>
+            <td>${d.clienteOLugar}</td>
+            <td>${d.tecnico || '-'}</td>
+            <td>${d.categoria}</td>
+            <td>${d.razon}</td>
+            <td style="display:flex;gap:5px;align-items:center;">${btn}<button class="deleteBtnTable" onclick="eliminarDevolucion('${d.codigo}')">X</button></td>
+        </tr>`; 
+    }); 
+}
+
+function toggleEsAntena() {
+    const esAntena = document.querySelector('input[name="radioEsAntena"]:checked').value === 'si';
+    if (esAntena) {
+        document.getElementById("bloqueDevolucionStandard").style.display = "none";
+        document.getElementById("bloqueDevolucionAntena").style.display = "block";
+    } else {
+        document.getElementById("bloqueDevolucionStandard").style.display = "block";
+        document.getElementById("bloqueDevolucionAntena").style.display = "none";
+    }
+}
+
+function registrarDevolucion() {
+    const esAntena = document.querySelector('input[name="radioEsAntena"]:checked').value === 'si';
+    let codigoFinal = ""; let categoriaFinal = "";
+    if (esAntena) {
+        const mac = document.getElementById("macDevolucion").value.trim();
+        if (!mac) { showAlert("Debes ingresar la Dirección MAC de la antena."); return; }
+        codigoFinal = mac; categoriaFinal = "Antena CPE";
+    } else {
+        const codigo = document.getElementById("codigoDevolucion").value.trim(); const cat = document.getElementById("categoriaDevolucion").value;
+        if (!codigo) { showAlert("Debes ingresar o generar un código."); return; }
+        if (!cat) { showAlert("Debes seleccionar una categoría."); return; }
+        codigoFinal = codigo; categoriaFinal = cat;
+    }
+    const tecnico = document.getElementById("selectTecnicoDevolucion").value;
+    const oficina = document.getElementById("selectOficinaDevolucion").value;
+    const cliente = document.getElementById("clienteOLugarDevolucion").value.trim(); 
+    const razonSelect = document.getElementById("razonDevolucion").value; 
+    const razonOtro = document.getElementById("razonOtroDevolucion").value.trim(); 
+    const falla = document.getElementById("tipoFallaInput").value.trim();
+    
+    if (!oficina) { showAlert("⚠️ La Oficina de recepción es obligatoria."); return; }
+    if (!cliente) { showAlert("El campo Cliente o Lugar es obligatorio."); return; } 
+    if (!razonSelect) { showAlert("Seleccione una razón de devolución."); return; }
+    
+    let razonReal = razonSelect; if (razonSelect === "Otro") { if (!razonOtro) { showAlert("Especifique la razón."); return; } razonReal = razonOtro; }
+    
+    showConfirm(`¿Registrar devolución en ${oficina}?<br><b>${categoriaFinal}</b> (${codigoFinal})`, async (si) => { 
+        if (si) { 
+            const resp = await enviarAPI('devolverArticulo', { codigo: codigoFinal, nombre: esAntena ? "Antena CPE (MAC)" : "Manual", categoria: categoriaFinal, razon: razonReal, tipoFalla: falla, clienteOLugar: cliente, tecnico: tecnico, oficina: oficina }); 
+            if (resp.success) { 
+                showAlert("✅ Devolución registrada correctamente en inventario."); 
+                document.getElementById("codigoDevolucion").value = ""; 
+                document.getElementById("macDevolucion").value = ""; 
+                document.getElementById("clienteOLugarDevolucion").value = ""; 
+                document.getElementById("categoriaDevolucion").value = ""; 
+                document.getElementById("razonDevolucion").value = ""; 
+                document.getElementById("razonOtroDevolucion").value = ""; 
+                document.getElementById("tipoFallaInput").value = ""; 
+                document.getElementById("selectTecnicoDevolucion").value = ""; 
+                document.getElementById("razonOtroDevolucion").style.display = "none"; 
+                document.getElementById("tipoFallaInput").style.display = "none"; 
+                cargarDatosDesdeDB(); 
+            } else { showAlert("Error: " + resp.message); } 
+        } 
+    });
+}
+
+function reutilizarArticulo(code) { showConfirm(`¿Restaurar ${code} al inventario?`, async (si) => { if(si) { const resp = await enviarAPI('reutilizarArticulo', { codigo: code, nombre: 'Restaurado', categoria: 'Restaurado' }); if(resp.success) { showAlert("Restaurado correctamente"); cargarDatosDesdeDB(); } } }); }
+function actualizarHistorial(){
+    const filtro = document.getElementById("filtroHistorial").value;
+    const tb = document.getElementById("tablaHistorial");
+    tb.innerHTML = "";
+    
+    // Filtramos el array en memoria
+    const historialFiltrado = historial.filter(h => cumpleFiltroFecha(h.fecha, filtro));
+
+    if(historialFiltrado.length === 0) {
+        tb.innerHTML = "<tr><td colspan='5' style='text-align:center'>No hay registros en este periodo</td></tr>";
+        return;
+    }
+
+    historialFiltrado.slice(0,100).forEach(h=>{
+        tb.innerHTML+=`<tr><td>${h.fecha}</td><td>${h.accion}</td><td>${h.codigo||''}</td><td>${h.nombre||''}</td><td>${h.tecnico}</td></tr>`;
+    });
+}
+function destruirGraficoPersonal(){if(graficoReportePersonalInstance){graficoReportePersonalInstance.destroy();graficoReportePersonalInstance=null;}}
+function generarGraficaReportePersonal(items){destruirGraficoPersonal();const c={};items.forEach(i=>{c[i.categoria]=(c[i.categoria]||0)+1;});const ctx=document.getElementById('graficoReportePersonal').getContext('2d');graficoReportePersonalInstance=new Chart(ctx,{type:'doughnut',data:{labels:Object.keys(c),datasets:[{data:Object.values(c),backgroundColor:['#3b82f6','#10b981','#f97316','#ef4444']}]},options:{responsive:true,maintainAspectRatio:false}});}
+async function mostrarReporteAsignaciones() {
+    const tec = document.getElementById("selectPersonalAsignaciones").value;
+    const rango = document.getElementById("filtroFechaAsignaciones").value;
+    const div = document.getElementById("listaAsignacionesPersonal");
+    
+    // Si no hay técnico seleccionado, limpiamos y salimos
+    if (!tec) {
+        div.innerHTML = "<p style='color:#666; text-align:center; padding:20px;'>Por favor seleccione un técnico de la lista.</p>";
+        destruirGraficoPersonal();
+        return;
+    }
+
+    div.innerHTML = "<p style='text-align:center;'>Cargando datos...</p>";
+
+    // Llamamos a la API
+    // Nota: 'getArticulosPorTecnico' ya existe en tu api.php
+    const items = await enviarAPI('getArticulosPorTecnico', { tecnico: tec, rango: rango });
+
+    div.innerHTML = "";
+
+    if (items && items.length > 0) {
+        // 1. Generamos el gráfico circular
+        generarGraficaReportePersonal(items);
+
+        // 2. Generamos la tabla de artículos
+        let html = `<div style="margin-bottom:10px; font-weight:bold;">Total asignado: ${items.length} artículos</div>`;
+        html += `<table>
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Artículo</th>
+                            <th>Categoría</th>
+                            <th>Fecha Asignación</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+        
+        items.forEach(i => {
+            html += `<tr>
+                <td>${i.codigo}</td>
+                <td>${escapeHtml(i.nombre)}</td>
+                <td>${escapeHtml(i.categoria)}</td>
+                <td>${i.fecha ? i.fecha.split(' ')[0] : '-'}</td>
+            </tr>`;
+        });
+        
+        html += `</tbody></table>`;
+        div.innerHTML = html;
+        
+    } else {
+        div.innerHTML = `<div style="text-align:center; padding:20px; color:#666;">
+                            <p>No se encontraron artículos asignados a <b>${tec}</b> en el periodo seleccionado.</p>
+                         </div>`;
+        destruirGraficoPersonal();
+    }
+}
+function generarCodigoDevolucion() { document.getElementById("codigoDevolucion").value = generarCodigo(); }
+function eliminarDevolucion(c){showConfirm("¿Eliminar registro?",async(si)=>{if(si){await enviarAPI('eliminarDevolucion',{codigo:c});cargarDatosDesdeDB();}});}
+function toggleOtroUso() { const select = document.getElementById("usoAsignar"); const otroInput = document.getElementById("otroUsoInput"); const clienteInput = document.getElementById("clienteAsignar"); if (select && otroInput && clienteInput) { if (select.value === "Otro") { otroInput.style.display = "block"; otroInput.placeholder = "Especifique el uso"; } else { otroInput.style.display = "none"; otroInput.value = ""; } if (select.value === "Instalacion Nueva" || select.value === "Averia") { clienteInput.style.display = "block"; clienteInput.required = true; } else { clienteInput.style.display = "none"; clienteInput.value = ""; clienteInput.required = false; } } }
+// Función para crear casillas según el número puesto en Cantidad
+function generarInputsCodigos() {
+    const cant = parseInt(document.getElementById("cantidadAsignar").value) || 1;
+    const container = document.getElementById("containerCodigosMasivos");
+    
+    // Guardamos valores actuales para no borrarlos si el usuario aumenta la cantidad
+    const actuales = Array.from(document.querySelectorAll(".inputCodigoMasivo")).map(i => i.value);
+    
+    container.innerHTML = "";
+    
+    for(let i = 0; i < cant; i++) {
+        const val = actuales[i] || "";
+        container.innerHTML += `<input class="inputCodigoMasivo" placeholder="Código ${i+1}" value="${val}">`;
+    }
+}
+
+// Función modificada para enviar MÚLTIPLES códigos
+async function asignarArticulo() {
+    const persona = document.getElementById("persona").value;
+    
+    // Recolectar todos los códigos escritos
+    const inputs = document.querySelectorAll(".inputCodigoMasivo");
+    let codigos = [];
+    inputs.forEach(inp => {
+        if(inp.value.trim() !== "") codigos.push(inp.value.trim());
+    });
+
+    if (!persona) { showAlert("Seleccione un técnico."); return; }
+    if (codigos.length === 0) { showAlert("Ingrese al menos un código."); return; }
+
+    showConfirm(`¿Asignar ${codigos.length} artículos a ${persona}?`, async (si) => {
+        if (si) {
+            const resp = await enviarAPI('asignarArticulo', { 
+                codigos: codigos, // Enviamos ARRAY de códigos
+                persona: persona 
+            });
+
+            if (resp.success) {
+                showAlert("✅ Asignación masiva completada.");
+                // Limpiar
+                document.getElementById("cantidadAsignar").value = "1";
+                generarInputsCodigos();
+                document.querySelectorAll(".inputCodigoMasivo").forEach(i => i.value = "");
+                cargarDatosDesdeDB();
+            } else {
+                showAlert("⚠️ Algunos códigos dieron error o no existen.");
+            }
+        }
+    });
+}
+function registrarArticulo(){ let c=document.getElementById("codigo").value.trim(), n=document.getElementById("nombre").value.trim(), s=document.getElementById("serial").value.trim(), cat=document.getElementById("categoria").value, cant=parseInt(document.getElementById("cantidad").value); let ofi=document.getElementById("registroOficina").value; let catOtro=document.getElementById("categoriaOtro").value.trim(); if(!n||!cat||cant<=0){showAlert("Faltan datos");return;} let catFinal=(cat==="Otro")?catOtro:cat; let itemsToSend=[]; if(c&&cant===1) itemsToSend.push({codigo:c,nombre:n,serial:s,categoria:catFinal,usuario:currentUser.user, oficina:ofi}); else for(let i=0;i<cant;i++) itemsToSend.push({codigo:generarCodigo(),nombre:n,serial:s,categoria:catFinal,usuario:currentUser.user, oficina:ofi}); showConfirm(`¿Registrar ${cant} de ${n}?`,async(si)=>{ if(si){ const resp=await enviarAPI('registrarArticulo',{items:itemsToSend,cantidad:cant,nombre:n,categoria:catFinal,oficina:ofi,usuario:currentUser.user}); if(resp.success){ document.getElementById("nombre").value=""; document.getElementById("serial").value=""; document.getElementById("codigo").value=generarCodigo(); cargarDatosDesdeDB(); setTimeout(() => { showConfirm("¿Imprimir etiquetas?", (p) => { if(p) imprimirCodigosArray(itemsToSend); }); }, 300); } else showAlert("Error: "+resp.message); } }); }
+function imprimirCodigosArray(items) { 
+    const p = document.getElementById('barcodePrintArea'); 
+    
+    // CORRECCIÓN: 
+    // 1. overflow: hidden en html/body para evitar hojas fantasmas por 1px extra.
+    // 2. :last-child con page-break-after: auto para que la última no salte hoja.
+    let style = `<style>
+        @page { size: ${printConfig.width}mm ${printConfig.height}mm; margin: 0mm; }
+        
+        html, body { 
+            width: ${printConfig.width}mm;
+            height: ${printConfig.height}mm; 
+            margin: 0 !important; 
+            padding: 0 !important; 
+            overflow: hidden !important; /* CLAVE: Corta cualquier exceso */
+        }
+
+        .mass-print-container { 
+            width: 100%; 
+            margin: 0; 
+            padding: 0;
+        }
+
+        .label-container { 
+            width: ${printConfig.width}mm !important; 
+            height: ${printConfig.height}mm !important; 
+            box-sizing: border-box; 
+            padding: 2px; 
+            margin: 0; 
+            border: none; /* Quitamos borde para evitar que sume al tamaño y desborde */
+            page-break-after: always; /* Salto de página normal */
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            text-align: center;
+            overflow: hidden;
+            background: white !important;
+        }
+
+        /* ESTO SOLUCIONA LA HOJA EN BLANCO AL FINAL */
+        .label-container:last-child {
+            page-break-after: avoid !important;
+            page-break-inside: avoid !important;
+        }
+
+        .label-container p { margin: 0; line-height: 1.1; white-space: nowrap; width: 100%; overflow: hidden; text-overflow: ellipsis; color: black !important; font-family: sans-serif;}
+        svg { max-width: 95%; height: auto; display:block; margin: 2px auto; }
+    </style>`;
+
+    let h = style + '<div class="mass-print-container">'; 
+    items.forEach((a, i) => { 
+        h += `<div class="label-container mass">
+                <p style="font-weight:bold;font-size:9px;">${escapeHtml(a.nombre).substring(0,18)}</p>
+                <p style="font-size:8px;">${a.categoria.toUpperCase()}</p>
+                <svg id="bc_new_${i}"></svg>
+                <p style="font-size:9px;">${a.codigo}</p>
+              </div>`; 
+    }); 
+    h += '</div>'; 
+    
+    p.style.display = "block"; 
+    p.innerHTML = h; 
+    
+    // Aseguramos scroll arriba
+    window.scrollTo(0,0);
+    
+    setTimeout(() => { 
+        items.forEach((a, i) => { 
+            try { 
+                JsBarcode(`#bc_new_${i}`, a.codigo, { 
+                    format: "CODE128", 
+                    displayValue: false, 
+                    margin: 0, 
+                    width: 1.5, 
+                    height: 25, 
+                    lineColor: "#000000" 
+                }); 
+            } catch (e) {} 
+        }); 
+        
+        setTimeout(() => { 
+            window.print(); 
+            setTimeout(() => { p.style.display='none'; }, 500); 
+        }, 800); 
+    }, 100); 
+}
+function closeBarcodePrintArea(){document.getElementById('barcodePrintArea').style.display='none';document.getElementById("app").style.display='block';document.getElementById("sidebar").style.display='flex';}
+function generarEImprimirCodigoBarra(code) { 
+    const art = inventario.find(x => x.codigo === code); 
+    if (!art) return; 
+    const p = document.getElementById('barcodePrintArea'); 
+    
+    let style = `<style>
+        @page { size: ${printConfig.width}mm ${printConfig.height}mm; margin: 0mm; }
+        body { margin: 0px !important; padding: 0px !important; }
+        .single-label-wrapper {
+            width: ${printConfig.width}mm !important; 
+            height: ${printConfig.height}mm !important; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center;
+            text-align: center;
+            margin: 0;
+            background: white;
+            padding: 2px;
+            overflow: hidden;
+            color: black !important;
+            page-break-after: always;
+        }
+        p { color: black !important; font-family: sans-serif; }
+    </style>`;
+
+    p.innerHTML = style + `
+        <div class="single-label-wrapper">
+            <p style="font-size:9px;font-weight:bold;margin:0;">${escapeHtml(art.nombre).substring(0,20)}</p>
+            <p style="font-size:8px;margin:0;">${art.categoria.toUpperCase()}</p>
+            <svg id="barcodeSvg" style="width:90%; height:auto; margin:2px 0;"></svg>
+            <p style="font-size:10px;font-weight:bold;margin:0;">${art.codigo}</p>
+        </div>
+    `; 
+    
+    // --- CAMBIOS IMPORTANTES AQUÍ ---
+    p.style.display = "block"; 
+    window.scrollTo(0,0);
+    
+    setTimeout(() => { 
+        JsBarcode("#barcodeSvg", code, { format: "CODE128", displayValue: false, margin: 0, width: 1.5, height: 30, lineColor: "#000000" }); 
+        setTimeout(() => {
+            window.print();
+            setTimeout(() => { p.style.display='none'; }, 500);
+        }, 500); 
+    }, 100); 
+}
+function imprimirCodigosDeBarraMasivo(){if(inventario.length===0){showAlert("Nada");return;}imprimirCodigosArray(inventario);}
+function generarCodigo(){return Math.floor(Math.random()*100000000).toString();}
+function toggleOtro(){document.getElementById("categoriaOtro").style.display=document.getElementById("categoria").value==="Otro"?"block":"none";}
+function toggleOtroDevolucion(){const v=document.getElementById("razonDevolucion").value;document.getElementById("razonOtroDevolucion").style.display=v==="Otro"?"block":"none";document.getElementById("tipoFallaInput").style.display=v==="Dañado"?"block":"none";}
+function showAlert(m){document.getElementById('modalTitle').textContent='Aviso';document.getElementById('modalMessage').innerHTML=m;document.getElementById('modalBtnCancel').style.display='none';document.getElementById('customModal').classList.add('show');document.getElementById('modalBtnConfirm').onclick=()=>document.getElementById('customModal').classList.remove('show');}
+function showConfirm(m,cb){document.getElementById('modalTitle').textContent='Confirmar';document.getElementById('modalMessage').innerHTML=m;document.getElementById('modalBtnCancel').style.display='block';document.getElementById('customModal').classList.add('show');document.getElementById('modalBtnConfirm').onclick=()=>{document.getElementById('customModal').classList.remove('show');cb(true);};document.getElementById('modalBtnCancel').onclick=()=>{document.getElementById('customModal').classList.remove('show');cb(false);};}
+let codigoParaMover = null;
+function abrirModalMover(codigo) { codigoParaMover = codigo; document.getElementById("txtMoverCodigo").innerText = codigo; const s = document.getElementById("selNuevaOficina"); s.innerHTML = "<option value='' selected>Sin Oficina (General)</option>"; oficinas.forEach(o => { s.innerHTML += `<option value="${o}">${o}</option>`; }); document.getElementById("modalMoverOficina").classList.add("show"); }
+async function guardarMovimientoOficina() { if(!codigoParaMover) return; const nuevaOfi = document.getElementById("selNuevaOficina").value; const resp = await enviarAPI('moverArticuloOficina', { codigo: codigoParaMover, nueva_oficina: nuevaOfi }); if(resp.success) { document.getElementById("modalMoverOficina").classList.remove("show"); showAlert("Artículo movido correctamente."); cargarInventarioPaginado(); if(document.getElementById('dashboard').style.display === 'block') cargarDatosDesdeDB(); } else { showAlert("Error: " + resp.message); } }
+const storedUser=localStorage.getItem("currentUser");if(storedUser){try{currentUser=JSON.parse(storedUser);iniciarSistema();}catch(e){logout();}}
+// --- LOGICA COMPLETAR ORDEN ---
+function toggleOtroCompletar() {
+    const val = document.getElementById("usoCompletar").value;
+    document.getElementById("usoOtroCompletar").style.display = (val === "Otro") ? "block" : "none";
+}
+
+function guardarCompletarOrden() {
+    const codigo = document.getElementById("codigoCompletar").value.trim();
+    const cliente = document.getElementById("clienteCompletar").value.trim();
+    const usoSelect = document.getElementById("usoCompletar").value;
+    const usoOtro = document.getElementById("usoOtroCompletar").value.trim();
+
+    // Validaciones
+    if (!codigo) { showAlert("El Código del artículo es obligatorio."); return; }
+    if (!cliente) { showAlert("El Nombre del Cliente es obligatorio."); return; }
+    if (!usoSelect) { showAlert("Debe seleccionar una Razón de uso."); return; }
+    
+    let usoFinal = usoSelect;
+    if (usoSelect === "Otro") {
+        if (!usoOtro) { showAlert("Especifique la razón 'Otro'."); return; }
+        usoFinal = usoOtro;
+    }
+
+    showConfirm(`¿Confirmar instalación de ${codigo} donde ${cliente}?`, async (si) => {
+        if (si) {
+            const resp = await enviarAPI('completarOrden', {
+                codigo: codigo,
+                cliente: cliente,
+                uso: usoFinal
+            });
+
+            if (resp.success) {
+                showAlert("✅ Orden completada y actualizada en inventario.");
+                // Limpiar campos
+                document.getElementById("codigoCompletar").value = "";
+                document.getElementById("clienteCompletar").value = "";
+                document.getElementById("usoCompletar").value = "";
+                document.getElementById("usoOtroCompletar").value = "";
+                document.getElementById("usoOtroCompletar").style.display = "none";
+                cargarDatosDesdeDB();
+            } else {
+                showAlert("❌ Error: " + resp.message);
+            }
+        }
+    });
+}
+</script>
+</body>
+</html>
